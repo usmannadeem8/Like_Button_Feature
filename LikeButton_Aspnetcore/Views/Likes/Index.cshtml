@@ -1,0 +1,74 @@
+﻿@model LikeButton_Aspnetcore.Models.DB.Likes
+
+@{
+    ViewData["Title"] = "Coding Challenge";
+}
+
+<h2>Coding Challenge - Like Button Feature</h2>
+
+<p>
+    <button id="loading" class="btn btn-success btn-xs" style="display:none"><i class="fa fa-spinner fa-spin"></i> Loading</button>
+    <button id="like" onclick="increment()" class="btn btn-success btn-xs"><i class="fa">&#xf087;</i> Like | <span id="total_likes_like"> @Model.TotalLikes</span></button>
+    <button id="dislike" onclick="decrement()" class="btn btn-success btn-xs" style="display:none"><i class="fa fa-thumbs-up"></i> Liked | <span id="total_likes_liked"> @Model.TotalLikes</span></button>
+</p>
+<ul>
+    <li>When a user clicks the like button, An ajax request is sent from client side to invoke async function of a server side where it increments the total number of likes and after successful responce button changes its state from "Like" to "Liked" and Counter on a button updates through Jquery.</li>
+    <li>In order to make it more resilient against abuse/exploitation, I am changing the state of the button so user cannot send multiple like requests for a single post.</li>
+    <li>In order to handle the multiple concurrent requests, the server side code is designed as "Task" based, which is the feature of C# to handle the cocurrent requests. </li>
+</ul>
+<script>
+
+    function increment() {
+        $("#like").hide();
+        $("#loading").show();
+           $.ajax({
+            url:"@Url.Action("Increment", "Likes")",
+            type: "POST",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (results) {
+                $("#loading").hide();
+                $("#dislike").show();
+                $("#total_likes_liked").text(results);
+
+            },
+
+            error: function (e) {
+                $("#loading").hide();
+                $("#like").show();
+               },
+
+            timeout: function () {
+                   $("#loading").hide();
+                   $("#like").show();
+               },
+        });
+    }
+
+        function decrement() {
+        $("#dislike").hide();
+        $("#loading").show();
+           $.ajax({
+            url:"@Url.Action("decrement", "Likes")",
+            type: "POST",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (results) {
+                $("#loading").hide();               
+                $("#like").show();
+                $("#total_likes_like").text(results);
+
+            },
+
+            error: function (e) {
+                $("#loading").hide();
+                $("#dislike").show();
+             },
+
+            timeout: function () {
+                $("#loading").hide();
+                $("#dislike").show();
+             },
+        });
+    }
+</script>
